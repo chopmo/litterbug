@@ -84,6 +84,7 @@ module LitterBug
       six_hours_ago = Time.now - (6 * 60 * 60)
       while @litterbox.last_action < six_hours_ago
         alert
+        sleep 1
       end
     end
 
@@ -116,7 +117,7 @@ module LitterBug
     def initialize(litterbox, logger = Logger.new($stdout))
       @litterbox = litterbox
       @logger = logger
-      @logger.info("Starting human thread")
+      @logger.info("Starting human loop")
       run
     end
 
@@ -139,5 +140,6 @@ module LitterBug
   end
 end
 
-LitterBug::Runner.run
-
+if $0 == __FILE__
+  LitterBug::Runner.run
+end
