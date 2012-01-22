@@ -101,8 +101,8 @@ module LitterBug
   class Alerter
     def initialize(logger)
       @logger = logger
-      @short_beep = "beep-9.mp3"
-      @long_beep = "beep-7.mp3"
+      @short_beep = "sounds/beep-7.mp3"
+      @long_beep = "sounds/beep-9.mp3"
     end
 
     def cleaning_needed
