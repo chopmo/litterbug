@@ -101,17 +101,20 @@ module LitterBug
   class Alerter
     def initialize(logger)
       @logger = logger
+      @short_beep = "beep-9.mp3"
+      @long_beep = "beep-7.mp3"
     end
 
     def cleaning_needed
-      puts "CLEANING needed"
+      @logger.info "Cleaning needed, playing #{@long_beep}"
+      system "mplayer #{@long_beep}"
     end
 
     def emptying_needeed
-      puts "EMPTYING needed"
+      @logger.info "Emptying needed, playing #{@short_beep}"
+      system "mplayer #{@short_beep}"
     end
   end
-
 
   class Human
     def initialize(litterbox, logger = Logger.new($stdout))
