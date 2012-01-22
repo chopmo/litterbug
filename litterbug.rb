@@ -1,12 +1,14 @@
-require 'date'
+require 'logger'
 
 module LitterBug
+
   class LitterBox
     attr_reader :last_action, :action_count
 
-    def initialize(logger = Logger.new($stdout))
+    def initialize(logger)
       @last_action = Time.at(0)
       @action_count = 0
+      @logger = logger
     end
 
     def action_performed
@@ -15,30 +17,38 @@ module LitterBug
       @logger.info "Action performed on litterbox, state: " + self.to_s
     end
 
+    def needs_cleaning?
+      @action_count % 10 == 0
+    end
+
     def to_s
-      "action count: #{@action_count}, last action #{@last_action}"
+      "action count: #{@action_count}, last action #{@last_action}, needs cleaning: #{needs_cleaning?}"
     end
   end
 
 
   class Timer
+    def initialize(logger)
+      @logger = logger
+    end
+
     def every_day_at(hh, mm, &block)
       @work = block
       @hh, @mm = hh, mm
     end
 
     def start
-      t = Thread.new do
+      Thread.new do
         while true
           seconds_to_wait = next_run_time - Time.now
+          @logger.info("Timer sleeping #{seconds_to_wait} seconds")
           sleep seconds_to_wait
+          @logger.debug("Timer performing work")
           perform_work
         end
       end
-      t.start
     end
 
-    private
     def next_run_time
       now = Time.now
       run_time = Time.local(now.year, now.month, now.day, @hh, @mm)
@@ -59,9 +69,11 @@ module LitterBug
       self.new.run
     end
 
-    def initialize(litterbox)
+    def initialize(litterbox, logger)
+      @logger = logger
       @litterbox = litterbox
-      @timer = Timer.new
+      @alerter = Alerter.new(logger)
+      @timer = Timer.new(logger)
       @timer.every_day_at(10, 00) do
         check
       end
@@ -77,23 +89,61 @@ module LitterBug
         alert
       end
     end
+
+    def alert
+      if @litterbox.needs_cleaning?
+        @alerter.cleaning_needed
+      else
+        @alerter.emptying_needeed
+      end
+    end
   end
 
+
+  class Alerter
+    def initialize(logger)
+      @logger = logger
+    end
+
+    def cleaning_needed
+      puts "CLEANING needed"
+    end
+
+    def emptying_needeed
+      puts "EMPTYING needed"
+    end
+  end
+
+
   class Human
-    def initialize(litterbox)
+    def initialize(litterbox, logger = Logger.new($stdout))
       @litterbox = litterbox
+      @logger = logger
+      @logger.info("Starting human thread")
+      run
     end
 
     def run
-      t = Thread.new do
-        while true
-          gets 
-          @litterbox.action_performed
-        end
+      while true
+        gets 
+        @litterbox.action_performed
       end
-      t.start
+    end
+  end
+
+  class Runner
+    def self.run
+      logger = Logger.new($stdout)
+      
+      litterbox = LitterBox.new(logger)
+      watcher = Watcher.new(litterbox, logger)
+      h = Human.new(litterbox, logger)
+      h.run
     end
   end
 end
 
-LitterBug::Watcher.run
+LitterBug::Runner.run
+
+sleep
+
