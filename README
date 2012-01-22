@@ -1,0 +1,5 @@
+I originally intended for this to be well tested, well designed etc. etc. Then I realized that for a program like this, IT IS OK to just do a quick and dirty implementation. In fact it would be ridiculous to waste time writing tests for a project like this. 
+
+Because unlike real systems, this really is not going to change or grow. 
+
+So don't use this code to learn from, or at least be very aware of the context. This is now how I would normally write production code. 
