@@ -7,7 +7,7 @@ module LitterBug
 
     def initialize(logger)
       @last_action = Time.at(0)
-      @action_count = 0
+      @action_count = 1
       @logger = logger
     end
 
