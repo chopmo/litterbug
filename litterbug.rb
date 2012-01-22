@@ -65,21 +65,18 @@ module LitterBug
 
 
   class Watcher
-    def self.run
-      self.new.run
-    end
-
     def initialize(litterbox, logger)
       @logger = logger
       @litterbox = litterbox
       @alerter = Alerter.new(logger)
       @timer = Timer.new(logger)
+    end
+
+    def start
+      @logger.info "Watcher: Starting watching litterbox every day at 10:00"
       @timer.every_day_at(10, 00) do
         check
       end
-    end
-
-    def run
       @timer.start
     end
 
@@ -136,14 +133,11 @@ module LitterBug
       logger = Logger.new($stdout)
       
       litterbox = LitterBox.new(logger)
-      watcher = Watcher.new(litterbox, logger)
-      h = Human.new(litterbox, logger)
-      h.run
+      Watcher.new(litterbox, logger).start
+      Human.new(litterbox, logger).run
     end
   end
 end
 
 LitterBug::Runner.run
-
-sleep
 
